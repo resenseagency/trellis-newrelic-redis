@@ -1,0 +1,34 @@
+---
+- name: Ensure New Relic integrations folder exists
+  file:
+    path: /etc/newrelic-infra/integrations.d
+    state: directory
+    mode: "0755"
+
+- name: Configure Redis integration
+  template:
+    src: redis-config.yml.j2
+    dest: /etc/newrelic-infra/integrations.d/redis-config.yml
+    mode: "0644"
+
+- name: Run New Relic integration health check
+  command: sudo /usr/bin/newrelic-infra -dry_run -integration_config_path /etc/newrelic-infra/integrations.d/redis-config.yml
+  register: newrelic_health_check_output
+  ignore_errors: yes
+
+- name: Check New Relic integration health check result
+  fail:
+    msg: "New Relic integration health check failed"
+  when: "'Integration health check finished with success' not in newrelic_health_check_output.stdout"
+
+- name: Ensure New Relic logging folder exists
+  file:
+    path: /etc/newrelic-infra/logging.d
+    state: directory
+    mode: "0755"
+
+- name: Configure Redis log integration
+  template:
+    src: redis-log.yml.j2
+    dest: /etc/newrelic-infra/logging.d/redis-log.yml
+    mode: "0644"

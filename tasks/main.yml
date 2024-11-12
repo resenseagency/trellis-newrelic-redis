@@ -1,0 +1,35 @@
+---
+- name: Check if Redis server is installed and running
+  command: redis-cli PING
+  register: redis_ping_output
+  ignore_errors: yes
+
+- name: Fail if Redis server is not installed and running
+  fail:
+    msg: "Redis server is not installed or running"
+  when: redis_ping_output.rc != 0
+
+- name: Get Redis version
+  shell: redis-cli INFO server | grep redis_version
+  register: redis_info_output
+
+- name: Debug Redis version output
+  debug:
+    var: redis_info_output.stdout
+
+- name: Fail if Redis version is not found
+  fail:
+    msg: "Redis version is not found"
+  when: redis_info_output.rc != 0 or 'redis_version' not in redis_info_output.stdout
+
+- name: Set Redis version fact
+  set_fact:
+    redis_version: "{{ redis_info_output.stdout.split(':')[1].strip() }}"
+
+- name: Fail when Redis version is greater than or equal to 6.0.0 and vault_newrelic_redis_acl_password is not defined
+  fail:
+    msg: "vault_newrelic_redis_acl_password is not defined and Redis version is greater than or equal to 6.0.0"
+  when: redis_version is version('6.0.0', '>=') and vault_newrelic_redis_acl_password is not defined
+
+- include_tasks: install.yml
+- include_tasks: ini.yml

@@ -1,0 +1,11 @@
+---
+- name: Create New Relic user for Redis
+  command: "redis-cli ACL SETUSER newrelic on >{{ vault_newrelic_redis_acl_password }} ~* +INFO +CONFIG|GET +SELECT +TYPE +LLEN +SCARD +ZCOUNT +HLEN"
+  when: redis_version is version('6.0.0', '>=')
+
+- name: Install New Relic Redis agent
+  apt:
+    name: nri-redis
+    state: "{{ newrelic_package_state }}"
+    update_cache: yes
+    cache_valid_time: "{{ apt_cache_valid_time }}"

@@ -1,0 +1,7 @@
+# {{ ansible_managed }}
+
+logs:
+  - name: "redislog"
+    file: {{ www_root }}/redis-server.log
+    attributes:
+      logtype: redis
