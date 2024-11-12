@@ -10,7 +10,7 @@ integrations:
       # Username is optional and available only with Redis v6+ https://redis.io/commands/auth
       USERNAME: newrelic
       # Password is optional. Use only with Redis servers that have REQUIREPASS or ACL is enabled. If both are enabled, use ACL password along with above username.
-      PASSWORD: "{{ vault_newrelic_redis_acl_password }}"
+      PASSWORD: {{ vault_newrelic_redis_acl_password }}
 {% endif %}
 
       # Unix sockets.
@@ -52,4 +52,4 @@ integrations:
     inventory_source: config/redis
     interval: 15s
     labels:
-      environment: "{{ env }}"
+      environment: {{ env }}
